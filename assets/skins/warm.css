@@ -2,7 +2,9 @@
  * Skin: warm — approachable, personal. Linen ground, serif heading + sans body, terracotta accent. */
 :root {
   --cs-bg: #f5efe3;
-  --cs-bg-image: radial-gradient(1200px 760px at 18% -5%, #fbf7ee 0%, #f2ead8 55%, #efe6d2 100%);
+  --cs-bg-image:
+    url(/_modules/comingsoon/skins/img/warm-bg.webp),
+    radial-gradient(1200px 760px at 18% -5%, #fbf7ee 0%, #f2ead8 55%, #efe6d2 100%);
   --cs-fg: #2b2620;
   --cs-muted: #7a7062;
   --cs-accent: #c2683f;

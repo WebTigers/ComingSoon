@@ -2,7 +2,9 @@
  * Skin: midnight — dark, confident. Deep midnight radial, luminous emerald accent, light-weight sans. */
 :root {
   --cs-bg: #0a0e17;
-  --cs-bg-image: radial-gradient(1100px 620px at 50% -12%, #1b2748 0%, #101a30 44%, #0a0e17 100%);
+  --cs-bg-image:
+    url(/_modules/comingsoon/skins/img/midnight-bg.webp),
+    radial-gradient(1100px 620px at 50% -12%, #1b2748 0%, #101a30 44%, #0a0e17 100%);
   --cs-fg: #f4f7fb;
   --cs-muted: #9aa6bd;
   --cs-accent: #34d399;

@@ -3,6 +3,7 @@
 :root {
   --cs-bg: #0a0f1e;
   --cs-bg-image:
+    url(/_modules/comingsoon/skins/img/aurora-bg.webp),
     radial-gradient(900px 620px at 14% 112%, rgba(6, 182, 212, 0.30), transparent 60%),
     radial-gradient(820px 640px at 86% -12%, rgba(124, 58, 237, 0.26), transparent 60%),
     linear-gradient(160deg, #0a0f1e 0%, #0b1530 55%, #0a0f1e 100%);

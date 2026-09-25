@@ -2,7 +2,9 @@
  * Skin: verdant — natural, grounded. Deep forest-green depth, serif heading, soft fresh-green accent. */
 :root {
   --cs-bg: #0b1f17;
-  --cs-bg-image: radial-gradient(1100px 720px at 22% -5%, #16382c 0%, #0e2820 52%, #081712 100%);
+  --cs-bg-image:
+    url(/_modules/comingsoon/skins/img/verdant-bg.webp),
+    radial-gradient(1100px 720px at 22% -5%, #16382c 0%, #0e2820 52%, #081712 100%);
   --cs-fg: #eaf3ee;
   --cs-muted: #8fb5a3;
   --cs-accent: #8ce99a;

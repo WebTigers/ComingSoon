@@ -3,8 +3,9 @@
  * lower band (paired with the `split`/lower-left layout so text stays readable), amber accent. */
 :root {
   --cs-bg: #1f1533;
-  --cs-bg-image: linear-gradient(180deg,
-      #e2915a 0%, #c66184 28%, #8a4d84 50%, #4c3168 72%, #2a1c47 88%, #1f1533 100%);
+  --cs-bg-image:
+    url(/_modules/comingsoon/skins/img/dusk-bg.webp),
+    linear-gradient(180deg, #e2915a 0%, #c66184 28%, #8a4d84 50%, #4c3168 72%, #2a1c47 88%, #1f1533 100%);
   --cs-fg: #fdf2f8;
   --cs-muted: #e7cede;
   --cs-accent: #fbbf24;

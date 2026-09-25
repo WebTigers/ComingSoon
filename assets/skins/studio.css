@@ -3,8 +3,8 @@
 :root {
   --cs-bg: #ededed;
   --cs-bg-image:
-    linear-gradient(0deg, rgba(17, 17, 17, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(17, 17, 17, 0.045) 1px, transparent 1px);
+    url(/_modules/comingsoon/skins/img/studio-bg.webp),
+    linear-gradient(180deg, #f0f0f0, #e7e7e7);
   --cs-fg: #141414;
   --cs-muted: #565656;
   --cs-accent: #e11d74;
@@ -14,7 +14,7 @@
   --cs-name-lh: 1.0;
   --cs-name-size: clamp(2.2rem, 7vw, 4.25rem);
 }
-.cs { background-size: 28px 28px; background-attachment: scroll; }
+.cs { background-attachment: scroll; }
 /* A small editorial marker before the name. */
 .cs__name::before {
   content: "// ";
