@@ -1,0 +1,112 @@
+/* SPDX-License-Identifier: BSD-3-Clause
+ * ComingSoon base — structure + the three layout variants. Every visual value is a --cs-* variable a
+ * skin overrides; this file has NO palette or font of its own beyond safe fallbacks. One request, no CDN. */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; }
+
+:root {
+  /* Palette (skins override) */
+  --cs-bg: #faf7f2;
+  --cs-bg-image: none;
+  --cs-fg: #1b1a18;
+  --cs-muted: #6b675f;
+  --cs-accent: #d97706;
+  /* Type */
+  --cs-font-heading: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --cs-font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --cs-name-size: clamp(2.5rem, 8vw, 5rem);
+  --cs-name-weight: 600;
+  --cs-name-spacing: -0.02em;
+  --cs-name-lh: 1.04;
+  --cs-name-transform: none;
+  --cs-tagline-size: clamp(1.05rem, 2.3vw, 1.4rem);
+  --cs-maxw: 44rem;
+  color-scheme: light;
+}
+
+.cs {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: calc(env(safe-area-inset-top, 0px) + 2rem) 1.5rem calc(env(safe-area-inset-bottom, 0px) + 2rem);
+  color: var(--cs-fg);
+  background-color: var(--cs-bg);
+  background-image: var(--cs-bg-image);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  font-family: var(--cs-font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.cs__stage { width: 100%; max-width: 64rem; }
+.cs__inner { max-width: var(--cs-maxw); }
+
+.cs__name {
+  margin: 0;
+  font-family: var(--cs-font-heading);
+  font-size: var(--cs-name-size);
+  line-height: var(--cs-name-lh);
+  font-weight: var(--cs-name-weight);
+  letter-spacing: var(--cs-name-spacing);
+  text-transform: var(--cs-name-transform);
+  color: var(--cs-fg);
+  text-wrap: balance;
+}
+
+.cs__tagline {
+  margin: 1.15rem 0 0;
+  max-width: 36rem;
+  font-size: var(--cs-tagline-size);
+  line-height: 1.55;
+  color: var(--cs-muted);
+  text-wrap: pretty;
+}
+
+.cs__contact {
+  margin-top: 2.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+}
+.cs__email {
+  color: var(--cs-accent);
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s ease;
+}
+.cs__email:hover { border-bottom-color: currentColor; }
+
+.cs__social { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; }
+.cs__social-link {
+  color: var(--cs-muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+  border-bottom: 1px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.cs__social-link:hover { color: var(--cs-accent); border-bottom-color: currentColor; }
+
+/* ---- Layout variants (a skin picks one) --------------------------------------------------------- */
+/* centered — content centered in the viewport */
+.cs--centered { place-items: center; text-align: center; }
+.cs--centered .cs__inner { margin-inline: auto; }
+.cs--centered .cs__contact { justify-content: center; }
+
+/* left — content left-aligned, vertically centered */
+.cs--left { place-items: center start; text-align: left; }
+.cs--left .cs__stage { justify-self: start; }
+
+/* split — content anchored to the lower-left (editorial poster), generous empty space above */
+.cs--split { place-items: end start; text-align: left; }
+.cs--split .cs__stage { justify-self: start; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

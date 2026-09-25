@@ -1,0 +1,73 @@
+<?php
+// SPDX-License-Identifier: BSD-3-Clause
+// Copyright (c) 2026 WebTigers. Tiger™ and WebTigers™ are trademarks of WebTigers.
+/** ComingSoon admin (/comingsoon/admin) — skin picker + live preview + on/off. No inline JS/CSS. */
+$t = fn($k) => Zend_Registry::get('Zend_Translate')->translate($k);
+$cur = $this->csCurrent;
+?>
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="h3 mb-1"><i class="fa-solid fa-rocket me-2"></i><?= $t('comingsoon.title') ?></h1>
+        <p class="text-body-secondary mb-0"><?= $t('comingsoon.subtitle') ?></p>
+    </div>
+</div>
+
+<div id="cs-admin-feedback"></div>
+
+<div id="cs-admin" data-cs-active="<?= $this->csActive ? '1' : '0' ?>">
+    <div class="card mb-4">
+        <div class="card-body d-flex flex-wrap align-items-center gap-3">
+            <span class="d-inline-flex align-items-center">
+                <span class="badge rounded-pill me-2 <?= $this->csActive ? 'text-bg-success' : 'text-bg-secondary' ?>" id="cs-status-badge">
+                    <i class="fa-solid <?= $this->csActive ? 'fa-circle-check' : 'fa-circle' ?> me-1"></i>
+                    <span id="cs-status-label"><?= $this->csActive ? $t('comingsoon.status.on') : $t('comingsoon.status.off') ?></span>
+                </span>
+            </span>
+            <span class="text-body-secondary small me-auto" id="cs-status-note"><?= $this->csActive ? $t('comingsoon.status.on.note') : $t('comingsoon.status.off.note') ?></span>
+            <button type="button" class="btn btn-outline-primary" id="cs-toggle"
+                    data-on-label="<?= $this->escape($t('comingsoon.showcs')) ?>"
+                    data-off-label="<?= $this->escape($t('comingsoon.golive')) ?>">
+                <?= $this->csActive ? $t('comingsoon.golive') : $t('comingsoon.showcs') ?>
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="fw-semibold mb-2"><?= $t('comingsoon.skins') ?></div>
+            <div class="row g-3" id="cs-skins">
+                <?php foreach ($this->csSkins as $name => $s): $sw = $s['swatch']; $active = ($name === $cur); ?>
+                <div class="col-6">
+                    <button type="button" class="card w-100 h-100 border-2 text-start p-0 overflow-hidden cs-skin<?= $active ? ' border-primary' : '' ?>"
+                            data-skin="<?= $this->escape($name) ?>" aria-pressed="<?= $active ? 'true' : 'false' ?>">
+                        <svg viewBox="0 0 160 96" width="100%" role="img" aria-label="<?= $this->escape($s['label']) ?> preview" preserveAspectRatio="xMidYMid slice">
+                            <rect width="160" height="96" fill="<?= $this->escape($sw['bg']) ?>"/>
+                            <rect x="20" y="40" width="86" height="9" rx="2" fill="<?= $this->escape($sw['fg']) ?>"/>
+                            <rect x="20" y="55" width="58" height="5" rx="2" fill="<?= $this->escape($sw['fg']) ?>" opacity="0.5"/>
+                            <rect x="20" y="68" width="26" height="4" rx="2" fill="<?= $this->escape($sw['accent']) ?>"/>
+                        </svg>
+                        <span class="d-block px-3 py-2 bg-body">
+                            <span class="d-flex align-items-center justify-content-between">
+                                <span class="fw-semibold"><?= $this->escape($s['label']) ?></span>
+                                <?php if ($active): ?><span class="badge text-bg-primary" data-cs-current><?= $t('comingsoon.current') ?></span><?php endif; ?>
+                            </span>
+                            <span class="d-block small text-body-secondary"><?= $this->escape($s['tagline']) ?></span>
+                        </span>
+                    </button>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="fw-semibold mb-2"><?= $t('comingsoon.preview') ?></div>
+            <div class="card overflow-hidden">
+                <div class="ratio ratio-16x9">
+                    <iframe id="cs-preview" class="border-0" title="<?= $this->escape($t('comingsoon.preview')) ?>"
+                            src="/comingsoon/admin/preview?skin=<?= urlencode($cur) ?>"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php $this->pageScript('/_modules/comingsoon/js/comingsoon.admin.js'); ?>

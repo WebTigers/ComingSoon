@@ -1,0 +1,12 @@
+/* SPDX-License-Identifier: BSD-3-Clause
+ * Skin: clean — light, minimal. White ground, near-black text, one restrained blue, generous space. */
+:root {
+  --cs-bg: #ffffff;
+  --cs-fg: #14161a;
+  --cs-muted: #6b7280;
+  --cs-accent: #2563eb;
+  --cs-name-weight: 600;
+  --cs-name-spacing: -0.028em;
+  --cs-name-size: clamp(2.4rem, 7vw, 4.5rem);
+  --cs-maxw: 40rem;
+}

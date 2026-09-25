@@ -1,0 +1,47 @@
+<?php
+// SPDX-License-Identifier: BSD-3-Clause
+// Copyright (c) 2026 WebTigers. Tiger™ and WebTigers™ are trademarks of WebTigers.
+/**
+ * The ComingSoon holding page — a complete, self-contained document (the layout is disabled).
+ * The only inlined CSS is the selected SKIN FILE's contents (base + skin), read from disk by the
+ * controller — skins stay separate, swappable files; the page stays a single request with no CDN.
+ * No bespoke CSS is authored here; markup is semantic and skinned entirely by the skin's variables.
+ */
+$e = fn($s) => $this->escape((string) $s);
+?><!doctype html>
+<html lang="en" data-cs-skin="<?= $e($this->skinName) ?>">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title><?= $e($this->siteName) ?></title>
+<?php if ($this->tagline): ?><meta name="description" content="<?= $e($this->tagline) ?>"><?php endif; ?>
+<meta property="og:title" content="<?= $e($this->siteName) ?>">
+<?php if ($this->tagline): ?><meta property="og:description" content="<?= $e($this->tagline) ?>"><?php endif; ?>
+<meta property="og:type" content="website">
+<link rel="icon" href="data:,">
+<style><?= $this->skinCss ?></style>
+</head>
+<body class="cs cs--<?= $e($this->layoutVariant) ?>">
+<main class="cs__stage">
+    <div class="cs__inner">
+        <h1 class="cs__name"><?= $e($this->siteName) ?></h1>
+        <?php if ($this->tagline): ?><p class="cs__tagline"><?= $e($this->tagline) ?></p><?php endif; ?>
+
+        <?php if ($this->email || !empty($this->social)): ?>
+        <div class="cs__contact">
+            <?php if ($this->email): ?>
+            <a class="cs__email" href="mailto:<?= $e($this->email) ?>"><?= $e($this->email) ?></a>
+            <?php endif; ?>
+            <?php if (!empty($this->social)): ?>
+            <nav class="cs__social" aria-label="Social links">
+                <?php foreach ($this->social as $s): ?>
+                <a class="cs__social-link" href="<?= $e($s['url']) ?>" rel="noopener noreferrer" target="_blank"><?= $e($s['label']) ?></a>
+                <?php endforeach; ?>
+            </nav>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+    </div>
+</main>
+</body>
+</html>

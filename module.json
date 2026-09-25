@@ -1,0 +1,33 @@
+{
+  "schema": "tiger.module/v1",
+  "slug": "comingsoon",
+  "name": "ComingSoon",
+  "version": "0.1.0",
+  "description": "A branded, single-page “Coming Soon” landing that a freshly provisioned site serves from the moment DNS resolves until the real site is published. Not a theme and not a site builder — one skinnable holding page, zero-config beyond a preset skin, that turns off automatically the instant a real theme goes live.",
+  "author": {
+    "name": "WebTigers",
+    "url": "https://webtigers.com"
+  },
+  "homepage": "https://github.com/WebTigers/ComingSoon",
+  "repository": "https://github.com/WebTigers/ComingSoon",
+  "license": "BSD-3-Clause",
+  "keywords": [
+    "coming-soon",
+    "landing",
+    "holding-page",
+    "placeholder",
+    "skins",
+    "tigerinstall"
+  ],
+  "requires": {
+    "tiger": ">=1.0",
+    "tiger-core": ">=1.8.0",
+    "php": ">=8.1"
+  },
+  "namespace": "Comingsoon",
+  "provides": {
+    "acl": "configs/acl.ini",
+    "assets": "assets"
+  },
+  "_notes": "PUBLIC / BSD-3. The repository ROOT is the module: on install its contents land in application/modules/comingsoon/. While ACTIVE it owns the public home ('/') via a front-controller plugin (Bootstrap) and renders one skinned holding page; every other route (login, admin) is untouched. It DEACTIVATES itself the instant a site theme is published (first real public page) — clean swap, no migration. Skins are self-contained CSS-variable overlays (assets/skins/<name>.css) with a catalog entry (configs/skins/<name>.php); adding a skin = adding those two files, no template change. Reads its content (site name, tagline, contact, social) from the install's existing Site Identity config — zero extra input beyond skin selection. No external CDN; fonts are system stacks; target Lighthouse 95+. Bundled with TigerInstall as the default fresh-install landing and auto-activated by TigerServer on account creation."
+}

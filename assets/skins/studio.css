@@ -1,0 +1,23 @@
+/* SPDX-License-Identifier: BSD-3-Clause
+ * Skin: studio — creative, editorial. Light-gray ground with a fine grid, monospace heading, magenta. */
+:root {
+  --cs-bg: #ededed;
+  --cs-bg-image:
+    linear-gradient(0deg, rgba(17, 17, 17, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 17, 17, 0.045) 1px, transparent 1px);
+  --cs-fg: #141414;
+  --cs-muted: #565656;
+  --cs-accent: #e11d74;
+  --cs-font-heading: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --cs-name-weight: 600;
+  --cs-name-spacing: -0.03em;
+  --cs-name-lh: 1.0;
+  --cs-name-size: clamp(2.2rem, 7vw, 4.25rem);
+}
+.cs { background-size: 28px 28px; background-attachment: scroll; }
+/* A small editorial marker before the name. */
+.cs__name::before {
+  content: "// ";
+  color: var(--cs-accent);
+  font-weight: 400;
+}

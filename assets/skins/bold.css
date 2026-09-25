@@ -1,0 +1,27 @@
+/* SPDX-License-Identifier: BSD-3-Clause
+ * Skin: bold — high-contrast, energetic. Charcoal ground, huge uppercase heading, amber accent bar. */
+:root {
+  --cs-bg: #141414;
+  --cs-fg: #ffffff;
+  --cs-muted: #a1a1aa;
+  --cs-accent: #ffb020;
+  --cs-font-heading: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --cs-name-weight: 800;
+  --cs-name-spacing: -0.035em;
+  --cs-name-lh: 0.94;
+  --cs-name-size: clamp(3rem, 13vw, 8rem);
+  --cs-name-transform: uppercase;
+  --cs-tagline-size: clamp(1.1rem, 2.5vw, 1.55rem);
+  --cs-maxw: 52rem;
+  color-scheme: dark;
+}
+/* An accent rule above the name — poster energy. */
+.cs__inner::before {
+  content: "";
+  display: block;
+  width: 3.5rem;
+  height: 5px;
+  margin-bottom: 1.75rem;
+  background: var(--cs-accent);
+}
+.cs__tagline { color: #d4d4d8; }

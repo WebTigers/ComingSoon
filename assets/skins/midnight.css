@@ -1,0 +1,15 @@
+/* SPDX-License-Identifier: BSD-3-Clause
+ * Skin: midnight — dark, confident. Deep midnight radial, luminous emerald accent, light-weight sans. */
+:root {
+  --cs-bg: #0a0e17;
+  --cs-bg-image: radial-gradient(1100px 620px at 50% -12%, #1b2748 0%, #101a30 44%, #0a0e17 100%);
+  --cs-fg: #f4f7fb;
+  --cs-muted: #9aa6bd;
+  --cs-accent: #34d399;
+  --cs-name-weight: 300;
+  --cs-name-spacing: -0.005em;
+  --cs-name-size: clamp(2.6rem, 8vw, 5.25rem);
+  color-scheme: dark;
+}
+.cs { background-attachment: scroll; }
+.cs__name { text-shadow: 0 1px 40px rgba(52, 211, 153, 0.08); }

@@ -1,0 +1,15 @@
+/* SPDX-License-Identifier: BSD-3-Clause
+ * Skin: warm — approachable, personal. Linen ground, serif heading + sans body, terracotta accent. */
+:root {
+  --cs-bg: #f5efe3;
+  --cs-bg-image: radial-gradient(1200px 760px at 18% -5%, #fbf7ee 0%, #f2ead8 55%, #efe6d2 100%);
+  --cs-fg: #2b2620;
+  --cs-muted: #7a7062;
+  --cs-accent: #c2683f;
+  --cs-font-heading: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+  --cs-name-weight: 600;
+  --cs-name-spacing: -0.01em;
+  --cs-name-lh: 1.08;
+  --cs-name-size: clamp(2.6rem, 7.5vw, 4.75rem);
+}
+.cs { background-attachment: scroll; }
