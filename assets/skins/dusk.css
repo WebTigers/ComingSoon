@@ -1,0 +1,18 @@
+/* SPDX-License-Identifier: BSD-3-Clause
+ * Skin: dusk — warm, cinematic. A muted dusk sky (amber → rose → plum → deep), light type over the dark
+ * lower band (paired with the `split`/lower-left layout so text stays readable), amber accent. */
+:root {
+  --cs-bg: #1f1533;
+  --cs-bg-image: linear-gradient(180deg,
+      #e2915a 0%, #c66184 28%, #8a4d84 50%, #4c3168 72%, #2a1c47 88%, #1f1533 100%);
+  --cs-fg: #fdf2f8;
+  --cs-muted: #e7cede;
+  --cs-accent: #fbbf24;
+  --cs-name-weight: 600;
+  --cs-name-spacing: -0.02em;
+  --cs-name-size: clamp(2.6rem, 8vw, 5rem);
+  color-scheme: dark;
+}
+.cs { background-attachment: scroll; }
+/* A soft scrim under the lower-left text zone keeps light type crisp over the mid-tones. */
+.cs__stage { text-shadow: 0 1px 24px rgba(20, 10, 30, 0.35); }

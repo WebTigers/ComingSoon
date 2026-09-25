@@ -1,0 +1,17 @@
+/* SPDX-License-Identifier: BSD-3-Clause
+ * Skin: aurora — vivid, atmospheric. Dark base with soft teal + violet aurora glows, thin light type. */
+:root {
+  --cs-bg: #0a0f1e;
+  --cs-bg-image:
+    radial-gradient(900px 620px at 14% 112%, rgba(6, 182, 212, 0.30), transparent 60%),
+    radial-gradient(820px 640px at 86% -12%, rgba(124, 58, 237, 0.26), transparent 60%),
+    linear-gradient(160deg, #0a0f1e 0%, #0b1530 55%, #0a0f1e 100%);
+  --cs-fg: #eef3fb;
+  --cs-muted: #9fb0cc;
+  --cs-accent: #22d3ee;
+  --cs-name-weight: 300;
+  --cs-name-spacing: -0.008em;
+  --cs-name-size: clamp(2.6rem, 8vw, 5.25rem);
+  color-scheme: dark;
+}
+.cs { background-attachment: scroll; }
