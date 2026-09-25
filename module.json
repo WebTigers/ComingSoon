@@ -2,7 +2,7 @@
   "schema": "tiger.module/v1",
   "slug": "comingsoon",
   "name": "ComingSoon",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "A branded, single-page “Coming Soon” landing that a freshly provisioned site serves from the moment DNS resolves until the real site is published. Not a theme and not a site builder — one skinnable holding page, zero-config beyond a preset skin, that turns off automatically the instant a real theme goes live.",
   "author": {
     "name": "WebTigers",
