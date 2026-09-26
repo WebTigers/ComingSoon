@@ -97,6 +97,8 @@ body { margin: 0; }
 /* centered — content centered in the viewport */
 .cs--centered { place-items: center; text-align: center; }
 .cs--centered .cs__inner { margin-inline: auto; }
+/* the tagline is capped at 36rem — centre the block too, not just its text */
+.cs--centered .cs__tagline { margin-inline: auto; }
 
 /* left — content left-aligned, vertically centered */
 .cs--left { place-items: center start; text-align: left; }
