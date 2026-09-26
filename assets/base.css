@@ -110,3 +110,21 @@ body { margin: 0; }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+/* ------------------------------------------------------------------------------------------------
+ * Owner background MEDIA (image or video) — an optional full-bleed layer behind the message, added
+ * in v1.1. It sits over the skin's own background; a scrim keeps the text legible on any media, and
+ * the message text is forced to a light, shadowed treatment so it reads over photos/video regardless
+ * of the chosen skin. No media set -> none of this renders and the skin's background shows as before.
+ * ---------------------------------------------------------------------------------------------- */
+.cs__bg { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; }
+.cs__bg--image { background-size: cover; background-position: center; background-repeat: no-repeat; }
+.cs__bg--video { object-fit: cover; }
+.cs__bg-scrim {
+  position: fixed; inset: 0; z-index: 1;
+  background: var(--cs-scrim, linear-gradient(180deg, rgba(0,0,0,0.32) 0%, rgba(0,0,0,0.56) 100%));
+}
+.cs--has-bg .cs__stage { position: relative; z-index: 2; }
+.cs--has-bg { --cs-fg: #ffffff; --cs-muted: rgba(255,255,255,0.85); --cs-accent: #ffffff; }
+.cs--has-bg .cs__name { text-shadow: 0 2px 26px rgba(0,0,0,0.45); }
+.cs--has-bg .cs__tagline { text-shadow: 0 1px 18px rgba(0,0,0,0.42); }

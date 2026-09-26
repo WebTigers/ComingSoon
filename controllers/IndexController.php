@@ -25,7 +25,9 @@ class Comingsoon_IndexController extends Tiger_Controller_Action
         $this->view->layoutVariant = $meta['layout'];
         $this->view->skinCss       = Comingsoon_Skins::css($skin);
         $this->view->siteName      = Comingsoon_Content::name();
+        $this->view->heading       = Comingsoon_Content::heading();
         $this->view->tagline       = Comingsoon_Content::tagline();
+        $this->view->background    = Comingsoon_Content::background();
         $this->view->email         = Comingsoon_Content::email();
         $this->view->social        = Comingsoon_Content::social();
 

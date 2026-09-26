@@ -6,8 +6,12 @@
  * The only inlined CSS is the selected SKIN FILE's contents (base + skin), read from disk by the
  * controller — skins stay separate, swappable files; the page stays a single request with no CDN.
  * No bespoke CSS is authored here; markup is semantic and skinned entirely by the skin's variables.
+ *
+ * Content is the owner's: an editable HEADING + TAGLINE, and an optional background MEDIA (image or
+ * video). When a background is set, it renders behind the message with a legibility scrim.
  */
-$e = fn($s) => $this->escape((string) $s);
+$e  = fn($s) => $this->escape((string) $s);
+$bg = $this->background ?? null;   // ['url','kind'=>'image'|'video','mime'] or null
 ?><!doctype html>
 <html lang="en" data-cs-skin="<?= $e($this->skinName) ?>">
 <head>
@@ -21,10 +25,20 @@ $e = fn($s) => $this->escape((string) $s);
 <link rel="icon" href="data:,">
 <style><?= $this->skinCss ?></style>
 </head>
-<body class="cs cs--<?= $e($this->layoutVariant) ?>">
+<body class="cs cs--<?= $e($this->layoutVariant) ?><?= $bg ? ' cs--has-bg' : '' ?>">
+<?php if ($bg): ?>
+    <?php if ($bg['kind'] === 'video'): ?>
+    <video class="cs__bg cs__bg--video" autoplay muted loop playsinline aria-hidden="true">
+        <source src="<?= $e($bg['url']) ?>"<?php if (!empty($bg['mime'])): ?> type="<?= $e($bg['mime']) ?>"<?php endif; ?>>
+    </video>
+    <?php else: ?>
+    <div class="cs__bg cs__bg--image" style="background-image:url('<?= $e($bg['url']) ?>')" aria-hidden="true"></div>
+    <?php endif; ?>
+    <div class="cs__bg-scrim" aria-hidden="true"></div>
+<?php endif; ?>
 <main class="cs__stage">
     <div class="cs__inner">
-        <h1 class="cs__name"><?= $e($this->siteName) ?></h1>
+        <h1 class="cs__name"><?= $e($this->heading) ?></h1>
         <?php if ($this->tagline): ?><p class="cs__tagline"><?= $e($this->tagline) ?></p><?php endif; ?>
 
         <?php if ($this->email || !empty($this->social)): ?>

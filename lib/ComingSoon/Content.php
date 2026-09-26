@@ -16,6 +16,10 @@ class Comingsoon_Content
     /** Social platforms shown if a URL is configured, in display order (label + Font Awesome-free glyph). */
     const SOCIAL = ['x', 'twitter', 'instagram', 'facebook', 'linkedin', 'youtube', 'tiktok', 'github'];
 
+    /** Defaults for the owner-editable message (used until the owner sets their own). */
+    const DEFAULT_HEADING = 'Coming Soon';
+    const DEFAULT_TAGLINE = 'Our new web experience will be here soon.';
+
     /** The site/brand name — the <h1>. Falls back to the request host, then a neutral default. */
     public static function name(): string
     {
@@ -24,10 +28,52 @@ class Comingsoon_Content
         return $n !== '' ? $n : 'This site';
     }
 
-    /** The tagline / short description — the subheading. May be empty. */
+    /** The main HEADING (the big centered line) — the owner's message. Editable; defaults to "Coming Soon". */
+    public static function heading(): string
+    {
+        return self::cfg('comingsoon.heading') ?: self::DEFAULT_HEADING;
+    }
+
+    /** The tagline / subheading — the owner's message. Editable; defaults to a friendly placeholder. */
     public static function tagline(): string
     {
-        return self::cfg('tiger.site.tagline') ?: self::cfg('tiger.site.description') ?: self::cfg('tiger.site.slogan');
+        return self::cfg('comingsoon.tagline') ?: self::DEFAULT_TAGLINE;
+    }
+
+    /** The chosen background media id ('' when none — the skin's own background shows). */
+    public static function backgroundId(): string
+    {
+        return self::cfg('comingsoon.background_media');
+    }
+
+    /**
+     * Resolve the background media to ['url'=>…, 'kind'=>'image'|'video', 'mime'=>…], or null when
+     * none is set / it can't be resolved. A video background renders as an autoplay/muted/loop <video>;
+     * an image as a cover background. Defensive: any failure just falls back to the skin's background.
+     *
+     * @return array{url:string,kind:string,mime:string}|null
+     */
+    public static function background(): ?array
+    {
+        return self::resolveMedia(self::backgroundId());
+    }
+
+    /** Resolve any media id to ['url','kind','mime'] (image/video only), or null. Used live by the preview too. */
+    public static function resolveMedia(string $id): ?array
+    {
+        $id = trim($id);
+        if ($id === '' || !class_exists('Tiger_Model_Media')) { return null; }
+        try {
+            $mm  = new Tiger_Model_Media();
+            $row = $mm->findById($id);
+            if (!$row) { return null; }
+            $arr  = $row->toArray();
+            $kind = (string) ($arr['kind'] ?? '');
+            if (!in_array($kind, ['image', 'video'], true)) { return null; }
+            return ['url' => (string) $mm->url($arr), 'kind' => $kind, 'mime' => (string) ($arr['mime_type'] ?? '')];
+        } catch (Throwable $e) {
+            return null;
+        }
     }
 
     /** A public contact email, or '' — shown as a mailto if present. */
@@ -71,6 +117,25 @@ class Comingsoon_Content
     {
         if (!Comingsoon_Skins::has($name)) { return false; }
         return self::store('comingsoon.skin', $name);
+    }
+
+    /** Persist the editable heading (trimmed, capped). Empty clears it back to the default. */
+    public static function setHeading(string $v): bool
+    {
+        return self::store('comingsoon.heading', mb_substr(trim($v), 0, 160));
+    }
+
+    /** Persist the editable tagline (trimmed, capped). Empty clears it back to the default. */
+    public static function setTagline(string $v): bool
+    {
+        return self::store('comingsoon.tagline', mb_substr(trim($v), 0, 300));
+    }
+
+    /** Persist the background media id (sanitised to a UUID shape; '' clears it). */
+    public static function setBackground(string $mediaId): bool
+    {
+        $id = preg_replace('/[^a-fA-F0-9-]/', '', trim($mediaId));
+        return self::store('comingsoon.background_media', (string) $id);
     }
 
     /** Turn the holding page on/off (off = the real site shows immediately). */

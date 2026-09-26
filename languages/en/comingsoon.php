@@ -14,4 +14,12 @@ return [
     'comingsoon.preview'        => 'Preview',
     'comingsoon.current'        => 'Current',
     'comingsoon.saved'          => 'Saved.',
+    'comingsoon.save'           => 'Save',
+    'comingsoon.message'        => 'Your message',
+    'comingsoon.label.heading'  => 'Heading',
+    'comingsoon.label.tagline'  => 'Tagline',
+    'comingsoon.label.background'      => 'Background media',
+    'comingsoon.label.background.help' => 'An optional image or video shown behind your message. Leave empty to use the look’s own background.',
+    'comingsoon.background.choose'     => 'Choose media',
+    'comingsoon.background.remove'     => 'Remove',
 ];

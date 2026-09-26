@@ -1,20 +1,29 @@
 <?php
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2026 WebTigers. Tiger™ and WebTigers™ are trademarks of WebTigers.
-/** ComingSoon admin (/comingsoon/admin) — skin picker + live preview + on/off. No inline JS/CSS. */
-$t = fn($k) => Zend_Registry::get('Zend_Translate')->translate($k);
+/** ComingSoon admin (/comingsoon/admin) — live preview + look picker + message fields. No inline JS/CSS.
+ *  Nothing saves on click; the Save button persists everything. */
+$t   = fn($k) => Zend_Registry::get('Zend_Translate')->translate($k);
 $cur = $this->csCurrent;
+$bg  = $this->csBg;   // ['url','kind','mime'] or null
 ?>
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
         <h1 class="h3 mb-1"><i class="fa-solid fa-rocket me-2"></i><?= $t('comingsoon.title') ?></h1>
         <p class="text-body-secondary mb-0"><?= $t('comingsoon.subtitle') ?></p>
     </div>
+    <div class="text-nowrap">
+        <button type="button" class="btn btn-primary" id="cs-save"><i class="fa-solid fa-floppy-disk me-2"></i><?= $t('comingsoon.save') ?></button>
+    </div>
 </div>
 
 <div id="cs-admin-feedback"></div>
 
-<div id="cs-admin" data-cs-active="<?= $this->csActive ? '1' : '0' ?>">
+<div id="cs-admin"
+     data-cs-active="<?= $this->csActive ? '1' : '0' ?>"
+     data-preview-base="/comingsoon/admin/preview">
+
+    <!-- On/off ("Go live") — a distinct, explicit action, separate from Save. -->
     <div class="card mb-4">
         <div class="card-body d-flex flex-wrap align-items-center gap-3">
             <span class="d-inline-flex align-items-center">
@@ -32,42 +41,80 @@ $cur = $this->csCurrent;
         </div>
     </div>
 
-    <div class="row g-4">
-        <div class="col-lg-5">
-            <div class="fw-semibold mb-2"><?= $t('comingsoon.skins') ?></div>
-            <div class="row g-3" id="cs-skins">
-                <?php foreach ($this->csSkins as $name => $s): $sw = $s['swatch']; $active = ($name === $cur); ?>
-                <div class="col-6">
-                    <button type="button" class="card w-100 h-100 border-2 text-start p-0 overflow-hidden cs-skin<?= $active ? ' border-primary' : '' ?>"
-                            data-skin="<?= $this->escape($name) ?>" aria-pressed="<?= $active ? 'true' : 'false' ?>">
-                        <svg viewBox="0 0 160 96" width="100%" role="img" aria-label="<?= $this->escape($s['label']) ?> preview" preserveAspectRatio="xMidYMid slice">
-                            <rect width="160" height="96" fill="<?= $this->escape($sw['bg']) ?>"/>
-                            <rect x="20" y="40" width="86" height="9" rx="2" fill="<?= $this->escape($sw['fg']) ?>"/>
-                            <rect x="20" y="55" width="58" height="5" rx="2" fill="<?= $this->escape($sw['fg']) ?>" opacity="0.5"/>
-                            <rect x="20" y="68" width="26" height="4" rx="2" fill="<?= $this->escape($sw['accent']) ?>"/>
-                        </svg>
-                        <span class="d-block px-3 py-2 bg-body">
-                            <span class="d-flex align-items-center justify-content-between">
-                                <span class="fw-semibold"><?= $this->escape($s['label']) ?></span>
-                                <?php if ($active): ?><span class="badge text-bg-primary" data-cs-current><?= $t('comingsoon.current') ?></span><?php endif; ?>
-                            </span>
-                            <span class="d-block small text-body-secondary"><?= $this->escape($s['tagline']) ?></span>
-                        </span>
-                    </button>
-                </div>
-                <?php endforeach; ?>
-            </div>
+    <!-- Look picker: 3-across. Clicking a look SELECTS it (updates the preview) — it does not save. -->
+    <div class="fw-semibold mb-2"><?= $t('comingsoon.skins') ?></div>
+    <div class="row g-3 mb-4" id="cs-skins">
+        <?php foreach ($this->csSkins as $name => $s): $sw = $s['swatch']; $active = ($name === $cur); ?>
+        <div class="col-6 col-md-4">
+            <button type="button" class="card w-100 h-100 border-2 text-start p-0 overflow-hidden cs-skin<?= $active ? ' border-primary' : '' ?>"
+                    data-skin="<?= $this->escape($name) ?>" aria-pressed="<?= $active ? 'true' : 'false' ?>">
+                <svg viewBox="0 0 160 96" width="100%" role="img" aria-label="<?= $this->escape($s['label']) ?> preview" preserveAspectRatio="xMidYMid slice">
+                    <rect width="160" height="96" fill="<?= $this->escape($sw['bg']) ?>"/>
+                    <rect x="20" y="40" width="86" height="9" rx="2" fill="<?= $this->escape($sw['fg']) ?>"/>
+                    <rect x="20" y="55" width="58" height="5" rx="2" fill="<?= $this->escape($sw['fg']) ?>" opacity="0.5"/>
+                    <rect x="20" y="68" width="26" height="4" rx="2" fill="<?= $this->escape($sw['accent']) ?>"/>
+                </svg>
+                <span class="d-block px-3 py-2 bg-body">
+                    <span class="d-flex align-items-center justify-content-between">
+                        <span class="fw-semibold"><?= $this->escape($s['label']) ?></span>
+                        <?php if ($active): ?><span class="badge text-bg-primary" data-cs-current><?= $t('comingsoon.current') ?></span><?php endif; ?>
+                    </span>
+                    <span class="d-block small text-body-secondary"><?= $this->escape($s['tagline']) ?></span>
+                </span>
+            </button>
         </div>
-        <div class="col-lg-7">
-            <div class="fw-semibold mb-2"><?= $t('comingsoon.preview') ?></div>
-            <div class="card overflow-hidden">
-                <div class="ratio ratio-16x9">
-                    <iframe id="cs-preview" class="border-0" title="<?= $this->escape($t('comingsoon.preview')) ?>"
-                            src="/comingsoon/admin/preview?skin=<?= urlencode($cur) ?>"></iframe>
+        <?php endforeach; ?>
+    </div>
+
+    <!-- Live preview -->
+    <div class="fw-semibold mb-2"><?= $t('comingsoon.preview') ?></div>
+    <div class="card overflow-hidden mb-4">
+        <div class="ratio ratio-16x9">
+            <iframe id="cs-preview" class="border-0" title="<?= $this->escape($t('comingsoon.preview')) ?>"
+                    src="/comingsoon/admin/preview?skin=<?= urlencode($cur) ?>"></iframe>
+        </div>
+    </div>
+
+    <!-- Message fields, UNDER the preview -->
+    <div class="card">
+        <div class="card-header fw-semibold"><i class="fa-solid fa-pen-to-square me-2"></i><?= $t('comingsoon.message') ?></div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label" for="cs-heading"><?= $t('comingsoon.label.heading') ?></label>
+                <input type="text" class="form-control" id="cs-heading" maxlength="160"
+                       placeholder="<?= $this->escape(Comingsoon_Content::DEFAULT_HEADING) ?>"
+                       value="<?= $this->escape($this->csHeading) ?>">
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="cs-tagline"><?= $t('comingsoon.label.tagline') ?></label>
+                <input type="text" class="form-control" id="cs-tagline" maxlength="300"
+                       placeholder="<?= $this->escape(Comingsoon_Content::DEFAULT_TAGLINE) ?>"
+                       value="<?= $this->escape($this->csTagline) ?>">
+            </div>
+            <div>
+                <label class="form-label"><?= $t('comingsoon.label.background') ?></label>
+                <div class="form-text mb-2"><?= $t('comingsoon.label.background.help') ?></div>
+                <input type="hidden" id="cs-bg-id" value="<?= $this->escape($this->csBgId) ?>">
+                <div class="d-flex align-items-center gap-3">
+                    <div id="cs-bg-thumb" class="border rounded d-flex align-items-center justify-content-center bg-body-tertiary text-body-secondary overflow-hidden flex-shrink-0"
+                         style="width:112px;height:64px;">
+                        <?php if ($bg && $bg['kind'] === 'image'): ?>
+                            <img src="<?= $this->escape($bg['url']) ?>" alt="" style="width:100%;height:100%;object-fit:cover;">
+                        <?php elseif ($bg && $bg['kind'] === 'video'): ?>
+                            <i class="fa-solid fa-film fa-lg"></i>
+                        <?php else: ?>
+                            <i class="fa-solid fa-image"></i>
+                        <?php endif; ?>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-outline-primary" id="cs-bg-choose"><i class="fa-solid fa-photo-film me-2"></i><?= $t('comingsoon.background.choose') ?></button>
+                        <button type="button" class="btn btn-outline-secondary<?= $bg ? '' : ' d-none' ?>" id="cs-bg-remove"><i class="fa-solid fa-xmark me-1"></i><?= $t('comingsoon.background.remove') ?></button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<?php $this->pageScript('/_theme/js/tiger.media-picker.js'); ?>
 <?php $this->pageScript('/_modules/comingsoon/js/comingsoon.admin.js'); ?>
