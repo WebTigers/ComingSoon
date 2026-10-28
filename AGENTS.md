@@ -43,9 +43,21 @@ steps aside the moment a real site publishes. Not a theme, not a site builder.
 
 ## Lifecycle (spec: coming-soon-module-spec.md / TIGER-229)
 Active → the holding page shows to guests across the public surface (logged-in users bypass). The owner's
-**Go live** toggle sets `comingsoon.active=0` (real site shows to everyone) without deactivating. Auto-activate on account creation (TigerServer) and auto-deactivate on
-first real publish (a core theme-publish hook) are the intended automation — the manual override + the
-active flag are the mechanism today; wire the events on the epic.
+**Go live** toggle sets `comingsoon.active=0` (real site shows to everyone) without deactivating.
+
+**Auto-activate** falls out of the install, not a bespoke hook: `comingsoon` is in
+`Tiger_Headless_Spec::DEFAULT_MODULES`, so every fresh install (shared-host via TigerServer `installApp`,
+and the TigerDen VPS firstboot) installs AND activates it, and `comingsoon.active` defaults to `'1'` — the
+wall is up from first boot with no create-flow code.
+
+**Auto-deactivate** is the module standing *itself* down (`Comingsoon_Plugin_Home` + `Comingsoon_Content::
+liveSiteReady()`): the instant the owner publishes a real site — a home page is configured
+(`tiger.site.home_page` non-empty, the CMS Settings "home page" field) — the plugin flips
+`comingsoon.active=0` and lets the request through. One-time; after that the `isActive()` gate
+short-circuits. This is done IN the module, not via a core hook, because core ships no publish event and a
+module must never be imported by core (ARCHITECTURE §0/§11). Theme activation is deliberately NOT the
+trigger — every install has a default `tiger.theme`, so it can't distinguish go-live from a fresh boot; the
+home-page choice is the unambiguous "first real page published" act.
 
 ## No external CDN
 Fonts are system stacks by design; no webfonts, no CDN — required for the offline/self-contained guarantee

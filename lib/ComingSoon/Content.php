@@ -131,6 +131,27 @@ class Comingsoon_Content
         return !in_array(strtolower((string) $v), ['0', 'false', 'off', 'no'], true);
     }
 
+    /**
+     * Has the owner published a real site? — the auto-deactivate signal.
+     *
+     * The holding page covers the gap between "DNS resolves" and "the real site is published"; once the
+     * owner sets a real home page (the CMS Settings screen writes `tiger.site.home_page`), that gap is
+     * closed and the wall has done its job. An empty value is the built-in landing — i.e. still a
+     * standup, not a published site — so it does NOT count as live. The plugin reads this to stand the
+     * module down on its own, since core ships no publish event to subscribe to and a module must never
+     * be imported by core (ARCHITECTURE §0/§11).
+     *
+     * Note: theme activation is deliberately NOT a trigger. Every install ships a default theme
+     * (`tiger.theme`), so "a theme is active" is always true and cannot distinguish a go-live from a
+     * fresh boot — the home-page choice is the unambiguous "first real page published" act.
+     *
+     * @return bool true once a real home page is configured
+     */
+    public static function liveSiteReady(): bool
+    {
+        return self::cfg('tiger.site.home_page') !== '';
+    }
+
     // ---- writers (admin) ------------------------------------------------------------------------
 
     /** Persist the selected skin. */

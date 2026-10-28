@@ -34,6 +34,18 @@ class Comingsoon_Plugin_Home extends Zend_Controller_Plugin_Abstract
         if (strtoupper((string) $request->getMethod()) !== 'GET') { return; }         // visible browsing only
         if (strtolower((string) $request->getModuleName()) === 'comingsoon') { return; } // no re-entry
         if (!class_exists('Comingsoon_Content') || !Comingsoon_Content::isActive()) { return; }
+
+        // Auto-deactivate on first real publish. Core ships no publish event to subscribe to, and a
+        // module must never be imported by core (ARCHITECTURE §0/§11), so the module stands ITSELF down:
+        // the moment the owner has published a real site (a home page is configured), flip the flag off
+        // and let the request fall through to the real site. One-time — the isActive() gate above
+        // short-circuits every later request, so this check never runs once the flag is down. Fail-open:
+        // even if the persist fails we still pass the request through this once (the real site is live).
+        if (Comingsoon_Content::liveSiteReady()) {
+            Comingsoon_Content::setActive(false);
+            return;
+        }
+
         if ($this->_isLoggedIn()) { return; }                                          // any authed user bypasses
 
         $path = trim((string) $request->getPathInfo(), '/');
