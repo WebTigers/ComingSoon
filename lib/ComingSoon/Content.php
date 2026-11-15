@@ -9,10 +9,21 @@
  * own stored settings. Every getter is defensive — the page renders cleanly with just a name (falling
  * back to the request host), so a brand-new account looks intentional immediately.
  *
+ * ORG LANE (TIGER-511). The module's own settings (skin, heading, tagline, background, active) are
+ * ORG-scoped config rows (`Tiger_Model_Config::SCOPE_ORG`) — never install-global, so one org's holding
+ * page can't bleed into another's. Every getter takes the org it answers for:
+ *   - `null` (the default) = the PUBLIC lane: the SITE org (`Tiger_Model_Org::siteOrgId()`), the tenant
+ *     that owns the site being served — never the visitor's own org;
+ *   - the admin screen passes `adminOrgId()`, the signed-in caller's current org, and writes there.
+ * Each read is that org's row, else the legacy GLOBAL row (pre-1.3 installs stored these globally), else
+ * the default — never another org's row.
+ *
  * @api
  */
 class Comingsoon_Content
 {
+    /** @var array<string,array<string,string>> per-request cache of config rows, keyed "<scope>|<scope_id>" */
+    protected static $_rows = [];
     /** Social platforms shown if a URL is configured, in display order (label + Font Awesome-free glyph). */
     const SOCIAL = ['x', 'twitter', 'instagram', 'facebook', 'linkedin', 'youtube', 'tiktok', 'github'];
 
@@ -29,21 +40,21 @@ class Comingsoon_Content
     }
 
     /** The main HEADING (the big centered line) — the owner's message. Editable; defaults to "Coming Soon". */
-    public static function heading(): string
+    public static function heading(?string $orgId = null): string
     {
-        return self::cfg('comingsoon.heading') ?: self::DEFAULT_HEADING;
+        return self::setting('comingsoon.heading', $orgId) ?: self::DEFAULT_HEADING;
     }
 
     /** The tagline / subheading — the owner's message. Editable; defaults to a friendly placeholder. */
-    public static function tagline(): string
+    public static function tagline(?string $orgId = null): string
     {
-        return self::cfg('comingsoon.tagline') ?: self::DEFAULT_TAGLINE;
+        return self::setting('comingsoon.tagline', $orgId) ?: self::DEFAULT_TAGLINE;
     }
 
     /** The chosen background media id ('' when none — the skin's own background shows). */
-    public static function backgroundId(): string
+    public static function backgroundId(?string $orgId = null): string
     {
-        return self::cfg('comingsoon.background_media');
+        return self::setting('comingsoon.background_media', $orgId);
     }
 
     /**
@@ -53,13 +64,22 @@ class Comingsoon_Content
      *
      * @return array{url:string,kind:string,mime:string}|null
      */
-    public static function background(): ?array
+    public static function background(?string $orgId = null): ?array
     {
-        return self::resolveMedia(self::backgroundId());
+        return self::resolveMedia(self::backgroundId($orgId), $orgId);
     }
 
-    /** Resolve any media id to ['url','kind','mime'] (image/video only), or null. Used live by the preview too. */
-    public static function resolveMedia(string $id): ?array
+    /**
+     * Resolve any media id to ['url','kind','mime'] (image/video only), or null. Used live by the preview too.
+     *
+     * The media row must belong to the lane's org or the shared '' tier — a media id from another org's
+     * library resolves to null (no URL is ever minted for it), whether it came from a stored setting or a
+     * preview query param.
+     *
+     * @param  string      $id    the media id
+     * @param  string|null $orgId the lane (null = the public site org; the admin passes adminOrgId())
+     */
+    public static function resolveMedia(string $id, ?string $orgId = null): ?array
     {
         $id = trim($id);
         if ($id === '' || !class_exists('Tiger_Model_Media')) { return null; }
@@ -68,6 +88,9 @@ class Comingsoon_Content
             $row = $mm->findById($id);
             if (!$row) { return null; }
             $arr  = $row->toArray();
+            if (!in_array((string) ($arr['org_id'] ?? ''), array_unique([self::laneOrg($orgId), '']), true)) {
+                return null;   // another org's media — never served
+            }
             $kind = (string) ($arr['kind'] ?? '');
             if (!in_array($kind, ['image', 'video'], true)) { return null; }
             return ['url' => (string) $mm->url($arr), 'kind' => $kind, 'mime' => (string) ($arr['mime_type'] ?? '')];
@@ -118,17 +141,31 @@ class Comingsoon_Content
     }
 
     /** The selected skin name (validated), else the default. */
-    public static function skin(): string
+    public static function skin(?string $orgId = null): string
     {
-        $s = self::cfg('comingsoon.skin');
+        $s = self::setting('comingsoon.skin', $orgId);
         return Comingsoon_Skins::has($s) ? $s : Comingsoon_Skins::DEFAULT_SKIN;
     }
 
-    /** Whether the holding page should show. True unless explicitly turned off (manual override / gone live). */
-    public static function isActive(): bool
+    /** Whether the holding page is switched on. True unless explicitly turned off (the admin's "Go live"). */
+    public static function isActive(?string $orgId = null): bool
     {
-        $v = self::cfg('comingsoon.active', '1');
-        return !in_array(strtolower((string) $v), ['0', 'false', 'off', 'no'], true);
+        $v = self::setting('comingsoon.active', $orgId);
+        if ($v === '') { return true; }
+        return !in_array(strtolower($v), ['0', 'false', 'off', 'no'], true);
+    }
+
+    /**
+     * Whether the holding page actually stands in front of the site: switched on AND no real site published
+     * yet. The auto stand-down is computed HERE, at read time — nothing is written when the owner publishes.
+     * (It used to persist `comingsoon.active=0` from inside whatever GET first noticed the publish, which
+     * meant an anonymous visitor's request wrote an install-global config row.) Same visible behaviour: once
+     * a home page is configured the wall is down, and "Show Coming Soon" can't raise it until the home page
+     * is cleared again.
+     */
+    public static function showing(?string $orgId = null): bool
+    {
+        return self::isActive($orgId) && !self::liveSiteReady($orgId);
     }
 
     /**
@@ -137,9 +174,12 @@ class Comingsoon_Content
      * The holding page covers the gap between "DNS resolves" and "the real site is published"; once the
      * owner sets a real home page (the CMS Settings screen writes `tiger.site.home_page`), that gap is
      * closed and the wall has done its job. An empty value is the built-in landing — i.e. still a
-     * standup, not a published site — so it does NOT count as live. The plugin reads this to stand the
-     * module down on its own, since core ships no publish event to subscribe to and a module must never
-     * be imported by core (ARCHITECTURE §0/§11).
+     * standup, not a published site — so it does NOT count as live. showing() reads this to stand the
+     * module down on its own (at read time — no write), since core ships no publish event to subscribe to
+     * and a module must never be imported by core (ARCHITECTURE §0/§11).
+     *
+     * Read in the same lane as the module's settings: the org's row, else the global row (where the CMS
+     * Settings screen writes it today), else the booted config (an ini-set home page).
      *
      * Note: theme activation is deliberately NOT a trigger. Every install ships a default theme
      * (`tiger.theme`), so "a theme is active" is always true and cannot distinguish a go-live from a
@@ -147,46 +187,109 @@ class Comingsoon_Content
      *
      * @return bool true once a real home page is configured
      */
-    public static function liveSiteReady(): bool
+    public static function liveSiteReady(?string $orgId = null): bool
     {
-        return self::cfg('tiger.site.home_page') !== '';
+        return (self::setting('tiger.site.home_page', $orgId) ?: self::cfg('tiger.site.home_page')) !== '';
+    }
+
+    /** The PUBLIC lane: the site org (the tenant that owns the site being served), '' pre-install. */
+    public static function siteOrgId(): string
+    {
+        return class_exists('Tiger_Model_Org') ? (string) Tiger_Model_Org::siteOrgId() : '';
+    }
+
+    /** The ADMIN lane: the signed-in caller's current org, or '' when there is no identity/org. */
+    public static function adminOrgId(): string
+    {
+        if (!class_exists('Zend_Auth')) { return ''; }
+        $identity = Zend_Auth::getInstance()->getIdentity();
+        return ($identity && !empty($identity->org_id)) ? (string) $identity->org_id : '';
     }
 
     // ---- writers (admin) ------------------------------------------------------------------------
+    // Each writes an ORG-scoped row for $orgId (the admin passes adminOrgId()). No org = no write: a
+    // caller without an org has no lane to save into, and the global tier is never written.
 
     /** Persist the selected skin. */
-    public static function setSkin(string $name): bool
+    public static function setSkin(string $name, string $orgId): bool
     {
         if (!Comingsoon_Skins::has($name)) { return false; }
-        return self::store('comingsoon.skin', $name);
+        return self::store('comingsoon.skin', $name, $orgId);
     }
 
     /** Persist the editable heading (trimmed, capped). Empty clears it back to the default. */
-    public static function setHeading(string $v): bool
+    public static function setHeading(string $v, string $orgId): bool
     {
-        return self::store('comingsoon.heading', mb_substr(trim($v), 0, 160));
+        return self::store('comingsoon.heading', mb_substr(trim($v), 0, 160), $orgId);
     }
 
     /** Persist the editable tagline (trimmed, capped). Empty clears it back to the default. */
-    public static function setTagline(string $v): bool
+    public static function setTagline(string $v, string $orgId): bool
     {
-        return self::store('comingsoon.tagline', mb_substr(trim($v), 0, 300));
+        return self::store('comingsoon.tagline', mb_substr(trim($v), 0, 300), $orgId);
     }
 
     /** Persist the background media id (sanitised to a UUID shape; '' clears it). */
-    public static function setBackground(string $mediaId): bool
+    public static function setBackground(string $mediaId, string $orgId): bool
     {
         $id = preg_replace('/[^a-fA-F0-9-]/', '', trim($mediaId));
-        return self::store('comingsoon.background_media', (string) $id);
+        return self::store('comingsoon.background_media', (string) $id, $orgId);
     }
 
     /** Turn the holding page on/off (off = the real site shows immediately). */
-    public static function setActive(bool $on): bool
+    public static function setActive(bool $on, string $orgId): bool
     {
-        return self::store('comingsoon.active', $on ? '1' : '0');
+        return self::store('comingsoon.active', $on ? '1' : '0', $orgId);
+    }
+
+    /** Drop the per-request config-row cache (a store() does this itself; exposed for tests). */
+    public static function resetCache(): void
+    {
+        self::$_rows = [];
     }
 
     // ---- internals ------------------------------------------------------------------------------
+
+    /** The org a lane resolves to: an explicit org, or (null) the public site org. */
+    protected static function laneOrg(?string $orgId): string
+    {
+        return $orgId === null ? self::siteOrgId() : $orgId;
+    }
+
+    /**
+     * A stored module setting for a lane: the org's ORG-scoped row, else the GLOBAL row (the legacy tier
+     * these settings lived in before 1.3), else ''. An org row that is present but EMPTY still wins — the
+     * owner cleared it back to the default, which a legacy global value must not undo. Never the merged
+     * Zend_Config — that folds the CURRENT request's org (a signed-in visitor's own), which is not
+     * necessarily the lane being answered for.
+     */
+    protected static function setting(string $key, ?string $orgId): string
+    {
+        $org = self::laneOrg($orgId);
+        if ($org !== '') {
+            $own = self::rows(Tiger_Model_Config::SCOPE_ORG, $org);
+            if (array_key_exists($key, $own)) { return $own[$key]; }
+        }
+        return self::rows(Tiger_Model_Config::SCOPE_GLOBAL, '')[$key] ?? '';
+    }
+
+    /** All active config rows for one scope as [key => trimmed value], cached per request. */
+    protected static function rows(string $scope, string $scopeId): array
+    {
+        $ck = $scope . '|' . $scopeId;
+        if (isset(self::$_rows[$ck])) { return self::$_rows[$ck]; }
+        $map = [];
+        try {
+            if (class_exists('Tiger_Model_Config')) {
+                foreach ((new Tiger_Model_Config())->getForScope($scope, $scopeId) as $row) {
+                    $map[(string) $row->config_key] = trim((string) $row->config_value);
+                }
+            }
+        } catch (Throwable $e) {
+            $map = [];   // no DB / no config table — defaults apply
+        }
+        return self::$_rows[$ck] = $map;
+    }
 
     /** Read a dotted key from the merged Zend_Config, '' when unset. */
     protected static function cfg(string $key, string $default = ''): string
@@ -200,12 +303,13 @@ class Comingsoon_Content
         return is_scalar($node) ? trim((string) $node) : $default;
     }
 
-    /** Write an install-level (global) setting via the config model. */
-    protected static function store(string $key, string $value): bool
+    /** Write an ORG-scoped setting for $orgId via the config model ('' org = refused, nothing written). */
+    protected static function store(string $key, string $value, string $orgId): bool
     {
-        if (!class_exists('Tiger_Model_Config')) { return false; }
+        if ($orgId === '' || !class_exists('Tiger_Model_Config')) { return false; }
         try {
-            (new Tiger_Model_Config())->set(Tiger_Model_Config::SCOPE_GLOBAL, '', $key, $value);
+            (new Tiger_Model_Config())->set(Tiger_Model_Config::SCOPE_ORG, $orgId, $key, $value);
+            self::resetCache();
             return true;
         } catch (Throwable $e) {
             return false;

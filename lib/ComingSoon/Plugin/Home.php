@@ -17,7 +17,8 @@
  *     this module's own screens, and anything that resolves to a static asset. Finding the login is
  *     the operator's job, not ours — this is a holding page, not an access-control product.
  *
- * Turning the page off is a config flag (comingsoon.active=0, the admin "Go live"); deactivating the
+ * Turning the page off is an org-scoped config flag (comingsoon.active=0, the admin "Go live"), and it
+ * stands down by itself once the site org has a published home page (read-time, see preDispatch); deactivating the
  * module removes the plugin entirely — so "released on deactivate, no cleanup" falls out of the
  * lifecycle. Walled responses are marked no-store so a shared cache can't serve the holding page to a
  * logged-in user (or vice versa).
@@ -33,20 +34,18 @@ class Comingsoon_Plugin_Home extends Zend_Controller_Plugin_Abstract
     {
         if (strtoupper((string) $request->getMethod()) !== 'GET') { return; }         // visible browsing only
         if (strtolower((string) $request->getModuleName()) === 'comingsoon') { return; } // no re-entry
+        // Everything below reads the SITE org's lane (Comingsoon_Content's default) — the tenant that owns
+        // the site being served, never the visitor's own org (TIGER-511).
         if (!class_exists('Comingsoon_Content') || !Comingsoon_Content::isActive()) { return; }
 
-        // Auto-deactivate on first real publish. Core ships no publish event to subscribe to, and a
-        // module must never be imported by core (ARCHITECTURE §0/§11), so the module stands ITSELF down:
-        // the moment the owner has published a real site (a home page is configured), flip the flag off
-        // and let the request fall through to the real site. One-time — the isActive() gate above
-        // short-circuits every later request, so this check never runs once the flag is down. Fail-open:
-        // even if the persist fails we still pass the request through this once (the real site is live).
-        if (Comingsoon_Content::liveSiteReady()) {
-            Comingsoon_Content::setActive(false);
-            return;
-        }
-
         if ($this->_isLoggedIn()) { return; }                                          // any authed user bypasses
+
+        // Auto stand-down on first real publish, computed at READ time: once the owner has published a real
+        // site (a home page is configured) the wall is simply down. Nothing is written — this runs inside an
+        // anonymous visitor's GET, and a guest request must never persist config (it used to flip a GLOBAL
+        // `comingsoon.active=0` here). Core ships no publish event and a module must never be imported by
+        // core (ARCHITECTURE §0/§11), so a read-time check is the module standing itself down.
+        if (Comingsoon_Content::liveSiteReady()) { return; }
 
         $path = trim((string) $request->getPathInfo(), '/');
         if ($this->_isAllowed($path)) { return; }                                      // auth/api/admin/assets

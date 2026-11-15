@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ComingSoon PHPUnit config.
+    integration  — needs a MySQL/MariaDB fixture DB (core's `config` + `media` tables are built from
+                   tiger-core's own migrations; see tests/Support/IntegrationTestCase.php).
+                   Self-skips when TIGER_TEST_DB_NAME is unset.
+
+  Dependencies (Tiger_*/Zend_*/PHPUnit) resolve from a sibling tiger-core checkout's vendor/ (or
+  $TIGER_CORE_VENDOR) — this module has no runtime vendor of its own. Run with that checkout's phpunit:
+    ../tiger-core/vendor/bin/phpunit
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         bootstrap="tests/bootstrap.php"
+         cacheDirectory=".phpunit.cache"
+         colors="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         beStrictAboutOutputDuringTests="true"
+         beStrictAboutTestsThatDoNotTestAnything="true"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+         displayDetailsOnTestsThatTriggerErrors="true">
+
+    <testsuites>
+        <testsuite name="integration">
+            <directory>tests/Integration</directory>
+        </testsuite>
+    </testsuites>
+
+    <source>
+        <include>
+            <directory suffix=".php">lib</directory>
+            <directory suffix=".php">controllers</directory>
+        </include>
+        <exclude>
+            <directory suffix=".php">languages</directory>
+        </exclude>
+    </source>
+
+    <php>
+        <env name="APPLICATION_ENV" value="testing"/>
+    </php>
+</phpunit>
