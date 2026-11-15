@@ -35,7 +35,12 @@ steps aside the moment a real site publishes. Not a theme, not a site builder.
   as `comingsoon.heading` / `comingsoon.tagline` / `comingsoon.background`, defaulting via
   `Comingsoon_Content::DEFAULT_HEADING`/`DEFAULT_TAGLINE`. Contact/social still come from Site Identity
   config. All module settings (`comingsoon.skin`, `comingsoon.active`, and the three above) are written via
-  `Tiger_Model_Config` (SCOPE_GLOBAL). The admin **never saves on click** — edits update the preview only;
+  `Tiger_Model_Config` as **ORG-scoped rows (SCOPE_ORG) for the admin's current org** — never SCOPE_GLOBAL
+  (TIGER-511, v1.3). Reads take the lane they answer for: the public page (default `null`) reads the
+  **site org** (`Tiger_Model_Org::siteOrgId()`, never the visitor's own org); the admin passes
+  `adminOrgId()`. Each read = that org's row (an explicit `''` still wins), else the legacy GLOBAL row,
+  else the default — never another org's row. A background media id only resolves to media whose `org_id`
+  is the lane org or `''` (stored value and the preview `?bg` alike). The admin **never saves on click** — edits update the preview only;
   the explicit **Save** button (`op=save`) persists skin+heading+tagline+background together. "Go live"
   (`set_active`) stays a separate immediate toggle.
 - **Skins auto-discover** from `configs/skins/*.php` (must have a matching `assets/skins/<name>.css`).
@@ -52,9 +57,11 @@ wall is up from first boot with no create-flow code.
 
 **Auto-deactivate** is the module standing *itself* down (`Comingsoon_Plugin_Home` + `Comingsoon_Content::
 liveSiteReady()`): the instant the owner publishes a real site — a home page is configured
-(`tiger.site.home_page` non-empty, the CMS Settings "home page" field) — the plugin flips
-`comingsoon.active=0` and lets the request through. One-time; after that the `isActive()` gate
-short-circuits. This is done IN the module, not via a core hook, because core ships no publish event and a
+(`tiger.site.home_page` non-empty, the CMS Settings "home page" field) — the wall is down. It is computed
+at READ time (`Comingsoon_Content::showing()` = active AND no home page; the plugin checks it for guests)
+and **nothing is written**: the old one-time flip persisted a GLOBAL `comingsoon.active=0` from inside
+whatever GET noticed first — an anonymous visitor's request writing install config (TIGER-511). The admin
+badge shows the effective state via `showing()`. This is done IN the module, not via a core hook, because core ships no publish event and a
 module must never be imported by core (ARCHITECTURE §0/§11). Theme activation is deliberately NOT the
 trigger — every install has a default `tiger.theme`, so it can't distinguish go-live from a fresh boot; the
 home-page choice is the unambiguous "first real page published" act.
@@ -62,3 +69,8 @@ home-page choice is the unambiguous "first real page published" act.
 ## No external CDN
 Fonts are system stacks by design; no webfonts, no CDN — required for the offline/self-contained guarantee
 and the Lighthouse target.
+
+## Tests
+`../tiger-core/vendor/bin/phpunit` (tiger-core as a sibling checkout, or `TIGER_CORE_VENDOR`). The integration
+suite builds core's real `config` + `media` tables from tiger-core's own migrations into a DEDICATED test DB
+(`TIGER_TEST_DB_NAME`; it self-skips when unset — never point it at dev/prod, it drops those tables).
