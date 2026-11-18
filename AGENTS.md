@@ -41,8 +41,11 @@ steps aside the moment a real site publishes. Not a theme, not a site builder.
   `adminOrgId()`. Each read = that org's row (an explicit `''` still wins), else the legacy GLOBAL row,
   else the default — never another org's row. A background media id only resolves to media whose `org_id`
   is the lane org or `''` (stored value and the preview `?bg` alike). The admin **never saves on click** — edits update the preview only;
-  the explicit **Save** button (`op=save`) persists skin+heading+tagline+background together. "Go live"
-  (`set_active`) stays a separate immediate toggle.
+  the explicit **Save** button persists skin+heading+tagline+background together; the on/off toggle stays
+  a separate immediate action. **Both are `/api` calls to `Comingsoon_Service_Settings` (`save`,
+  `setActive`), each validating a `Tiger_Form` (`Comingsoon_Form_Settings` / `_Active`) that shares one
+  CSRF salt (`Comingsoon_Form_Write`), so the screen's single rendered `_csrf` serves both (TIGER-538).**
+  Never add a write to the controller — the old `apiAction` took writes on an X-Requested-With header alone.
 - **Skins auto-discover** from `configs/skins/*.php` (must have a matching `assets/skins/<name>.css`).
   Adding a skin = adding those two files.
 

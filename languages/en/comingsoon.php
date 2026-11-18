@@ -16,6 +16,10 @@ return [
     'comingsoon.confirm.body'   => 'Visitors will see your site as it is right now instead of the Coming Soon page. You can turn it back on at any time.',
     'comingsoon.confirm.ok'     => 'Turn off',
     'comingsoon.confirm.cancel' => 'Cancel',
+    'comingsoon.error.no_org'     => 'Your account isn’t in an organization, so there’s nowhere to save this.',
+    'comingsoon.error.save'       => 'That didn’t save. Please try again.',
+    'comingsoon.error.skin'       => 'Choose one of the looks shown.',
+    'comingsoon.error.background' => 'That background isn’t a media item from your library.',
     'comingsoon.saved.on'       => 'The Coming Soon page is on. Visitors see it now.',
     'comingsoon.saved.off'      => 'The Coming Soon page is off. Visitors see your site.',
     // The signed-in notice bar on public pages (Comingsoon_Plugin_Notice).

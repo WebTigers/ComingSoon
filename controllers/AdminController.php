@@ -6,14 +6,14 @@
  *
  * index renders the editor: a live preview, the skin "look" cards, and the message fields (heading,
  * tagline, background media) below it. Nothing saves on click — the admin edits freely and the preview
- * updates live; a single Save button persists via `api` (op=save). `set_active` is the separate on/off
- * ("Go live") action. preview renders the holding page for the CURRENT (possibly unsaved) values passed
- * as query params, so the admin sees exactly what will publish before saving.
+ * updates live; a single Save button persists through `/api` (Comingsoon_Service_Settings::save) and the
+ * on/off toggle through `setActive` — both form-validated with the screen's one CSRF token (TIGER-538;
+ * this controller used to take those writes itself, on an X-Requested-With header alone). preview renders
+ * the holding page for the CURRENT (possibly unsaved) values passed as query params, so the admin sees
+ * exactly what will publish before saving.
  */
 class Comingsoon_AdminController extends Tiger_Controller_Admin_Action
 {
-    const OPS = ['save', 'set_active'];
-
     public function indexAction()
     {
         // NB: namespaced view vars — a bare `skins` would clobber the admin layout's own theme-skin list
@@ -29,41 +29,9 @@ class Comingsoon_AdminController extends Tiger_Controller_Admin_Action
         $this->view->csTagline = Comingsoon_Content::tagline($org);
         $this->view->csBgId    = Comingsoon_Content::backgroundId($org);
         $this->view->csBg      = Comingsoon_Content::background($org);   // ['url','kind','mime'] or null (thumbnail)
+        $this->view->csForm    = new Comingsoon_Form_Settings();         // renders the screen's one write token
     }
 
-    /** AJAX: op=save (skin/heading/tagline/background) | op=set_active&on=0|1 */
-    public function apiAction()
-    {
-        if (strtolower((string) $this->getRequest()->getHeader('X-Requested-With')) !== 'xmlhttprequest') {
-            return $this->_json(['ok' => false, 'error' => 'ajax only'], 400);
-        }
-        $op = preg_replace('/[^a-z_]/', '', strtolower((string) $this->getRequest()->getParam('op', '')));
-        if (!in_array($op, self::OPS, true)) { return $this->_json(['ok' => false, 'error' => 'unknown op'], 400); }
-
-        // Settings are org-scoped: written for the signed-in admin's CURRENT org, never install-global. A
-        // caller with no org has no lane to save into (TIGER-511).
-        $org = Comingsoon_Content::adminOrgId();
-        if ($org === '') { return $this->_json(['ok' => false, 'error' => 'no org'], 400); }
-
-        if ($op === 'save') {
-            $req  = $this->getRequest();
-            $skin = (string) $req->getParam('skin', '');
-            if ($skin !== '' && !Comingsoon_Skins::has($skin)) {
-                return $this->_json(['ok' => false, 'error' => 'invalid skin'], 400);
-            }
-            $ok = ($skin === '' || Comingsoon_Content::setSkin($skin, $org))
-                && Comingsoon_Content::setHeading((string) $req->getParam('heading', ''), $org)
-                && Comingsoon_Content::setTagline((string) $req->getParam('tagline', ''), $org)
-                && Comingsoon_Content::setBackground((string) $req->getParam('background', ''), $org);
-            return $ok ? $this->_json(['ok' => true]) : $this->_json(['ok' => false, 'error' => 'save failed'], 500);
-        }
-
-        $on = !in_array(strtolower((string) $this->getRequest()->getParam('on', '1')), ['0', 'false', 'off', 'no'], true);
-        if (!Comingsoon_Content::setActive($on, $org)) {
-            return $this->_json(['ok' => false, 'error' => 'save failed'], 500);
-        }
-        return $this->_json(['ok' => true, 'active' => $on]);
-    }
 
     /**
      * Render the holding page for the live editor values (?skin, ?heading, ?tagline, ?bg=<media id>),
