@@ -1,7 +1,8 @@
 /* SPDX-License-Identifier: BSD-3-Clause
  * ComingSoon admin — live editor. Nothing saves on click: picking a look, typing a heading/tagline, or
- * choosing a background just updates the LIVE preview. One Save button persists everything (op=save).
- * "Go live" (op=set_active) is the separate on/off action. Over /comingsoon/admin/api. */
+ * choosing a background just updates the LIVE preview. One Save button persists everything; the on/off
+ * toggle is the separate immediate action. Both go to /api (Comingsoon_Service_Settings save / setActive)
+ * carrying the screen's CSRF token. */
 (function () {
     'use strict';
     var root = document.getElementById('cs-admin');
@@ -15,18 +16,33 @@
     var elThumb  = document.getElementById('cs-bg-thumb');
     var elRemove = document.getElementById('cs-bg-remove');
 
-    function api(op, params) {
-        return fetch('/comingsoon/admin/api', {
+    // Every write goes through /api (Comingsoon_Service_Settings) with the screen's CSRF token (TIGER-538).
+    function api(method, params) {
+        var tok  = document.querySelector('#cs-csrf [name="_csrf"]');
+        var body = Object.assign({ module: 'comingsoon', service: 'settings', method: method, _csrf: tok ? tok.value : '' }, params || {});
+        return fetch('/api', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
-            body: new URLSearchParams(Object.assign({ op: op }, params || {}))
-        }).then(function (r) { return r.json().catch(function () { return { ok: false, error: 'bad response' }; }); });
+            body: new URLSearchParams(body)
+        }).then(function (r) { return r.json().catch(function () { return { result: 0, messages: [] }; }); });
     }
     function note(msg, type) {
         if (window.TigerDOM && TigerDOM.notify) { TigerDOM.notify(fb, msg, { type: type || 'info' }); }
         else { var d = document.createElement('div'); d.className = 'alert alert-' + (type === 'error' ? 'danger' : (type || 'info')); d.textContent = msg; fb.innerHTML = ''; fb.appendChild(d); }
     }
-    function bad(r) { if (r && r.ok) { return false; } note((r && r.error) || 'error', 'error'); return true; }
+    // The standard envelope: result 1 = ok; otherwise show the server's messages, and any per-field errors.
+    function bad(r) {
+        if (r && r.result === 1) { return false; }
+        var msgs = (r && r.messages) || [];
+        if (r && r.form) {
+            Object.keys(r.form).forEach(function (f) {
+                var errs = r.form[f]; Object.keys(errs || {}).forEach(function (k) { msgs.push({ message: errs[k], class: 'error' }); });
+            });
+        }
+        if (!msgs.length) { msgs.push({ message: 'Something went wrong — please try again.', class: 'error' }); }
+        msgs.forEach(function (m) { note(m.message, m.class === 'success' ? 'success' : 'error'); });
+        return true;
+    }
 
     function currentSkin() {
         var on = root.querySelector('.cs-skin[aria-pressed="true"]');
@@ -109,7 +125,11 @@
         var btn = this;
         var task = function () { return api('save', values()); };
         var run = (window.TigerButton && TigerButton.run) ? TigerButton.run(btn, task) : task();
-        Promise.resolve(run).then(function (r) { if (bad(r)) { return; } note('Saved.', 'success'); }).catch(function () { note('Network error — please try again.', 'error'); });
+        Promise.resolve(run).then(function (r) {
+            if (bad(r)) { return; }
+            var m = (r.messages || [])[0];   // the server's translated "Saved."
+            note(m ? m.message : 'Saved.', 'success');
+        }).catch(function () { note('Network error — please try again.', 'error'); });
     });
 
     /* ---- On/off — the one explicit immediate action ------------------------------------------ */
@@ -130,7 +150,7 @@
         var makeActive = root.getAttribute('data-cs-active') !== '1';
         (makeActive ? Promise.resolve(true) : confirmOff()).then(function (ok) {
             if (!ok) { return; }
-            var task = function () { return api('set_active', { on: makeActive ? '1' : '0' }); };
+            var task = function () { return api('setActive', { on: makeActive ? '1' : '0' }); };
             var run = (window.TigerButton && TigerButton.run) ? TigerButton.run(btn, task) : task();
             return Promise.resolve(run).then(function (r) {
                 if (bad(r)) { return; }

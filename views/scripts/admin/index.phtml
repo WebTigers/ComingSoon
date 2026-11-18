@@ -13,6 +13,8 @@ $bg  = $this->csBg;   // ['url','kind','mime'] or null
 </div>
 
 <div id="cs-admin-feedback"></div>
+<?php /* The screen's one write token: Save and the on/off toggle both post it (shared salt, TIGER-538). */ ?>
+<div id="cs-csrf" hidden><?= $this->csForm ? $this->csForm->getElement('_csrf') : '' ?></div>
 
 <div id="cs-admin"
      data-cs-active="<?= $this->csActive ? '1' : '0' ?>"

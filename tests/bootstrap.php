@@ -56,6 +56,10 @@ spl_autoload_register(static function ($class) use ($moduleRoot) {
     if (strncmp($class, 'Comingsoon_', 11) !== 0) { return; }
     if ($class === 'Comingsoon_Bootstrap') {
         $file = $moduleRoot . '/Bootstrap.php';
+    } elseif (preg_match('/^Comingsoon_Form_(\w+)$/', $class, $m)) {
+        $file = $moduleRoot . '/forms/' . $m[1] . '.php';           // ZF1's Form resource type
+    } elseif (preg_match('/^Comingsoon_Service_(\w+)$/', $class, $m)) {
+        $file = $moduleRoot . '/services/' . $m[1] . '.php';        // ZF1's Service resource type
     } elseif (preg_match('/^Comingsoon_(.+)Controller$/', $class, $m)) {
         $file = $moduleRoot . '/controllers/' . $m[1] . 'Controller.php';
     } else {
