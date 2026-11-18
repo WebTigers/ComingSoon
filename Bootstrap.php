@@ -17,11 +17,15 @@ class Comingsoon_Bootstrap extends Zend_Application_Module_Bootstrap
         require_once $lib . '/Skins.php';
         require_once $lib . '/Content.php';
         require_once $lib . '/Plugin/Home.php';
+        require_once $lib . '/Plugin/Notice.php';
 
         // Append (no explicit stackIndex — a fixed one collides with core plugins). Module bootstraps run
         // AFTER core, so an appended plugin sorts after the core plugins and still has the final say over
         // how '/' dispatches (see the plugin doc).
-        Zend_Controller_Front::getInstance()->registerPlugin(new Comingsoon_Plugin_Home());
+        $front = Zend_Controller_Front::getInstance();
+        $front->registerPlugin(new Comingsoon_Plugin_Home());
+        // The signed-in "visitors see your Coming Soon page" bar (TIGER-537) — decorates the finished page.
+        $front->registerPlugin(new Comingsoon_Plugin_Notice());
     }
 
     /** A sidebar entry (admin+, ACL-filtered) for the skin picker + status. */

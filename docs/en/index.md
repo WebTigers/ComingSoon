@@ -20,11 +20,18 @@ Under the preview you set what the page says:
 
 Nothing is saved as you experiment — the preview just reflects your edits. Press **Save** when you're happy.
 
-## Go live
+## Turning it off and on
 
-When your real site is ready, use **Show my site now** to hand the page straight over to your site. You can
-switch back to the Coming Soon page at any time until you publish. (When you publish your site normally, the
-Coming Soon page steps aside on its own.)
+When your real site is ready, use **Turn off Coming Soon**. It asks you to confirm first, because visitors
+see your site as it is right then. **Turn on Coming Soon** puts the holding page back at any time until you
+publish. (When you publish your site normally, the Coming Soon page steps aside on its own.)
+
+## What you see while signed in
+
+You see your real site, not the Coming Soon page, because you're signed in. So you always know which one
+visitors get, every public page shows a slim bar at the top while the Coming Soon page is up: *"Visitors see
+your Coming Soon page."* It links to **Preview what visitors see** and to these settings. Visitors never see
+the bar, and it goes away once the Coming Soon page is off or your site is published.
 
 ## Good to know
 

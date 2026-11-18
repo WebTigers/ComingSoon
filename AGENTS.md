@@ -48,7 +48,11 @@ steps aside the moment a real site publishes. Not a theme, not a site builder.
 
 ## Lifecycle (spec: coming-soon-module-spec.md / TIGER-229)
 Active → the holding page shows to guests across the public surface (logged-in users bypass). The owner's
-**Go live** toggle sets `comingsoon.active=0` (real site shows to everyone) without deactivating.
+**Turn off Coming Soon** toggle (confirmed in a TigerModal) sets `comingsoon.active=0` (real site shows to
+everyone) without deactivating. Because logged-in users bypass, `Comingsoon_Plugin_Notice` injects a slim
+bar after `<body>` on public HTML pages for a signed-in user while `Content::showing()` (TIGER-537): a
+dispatchLoopShutdown body rewrite, so it works with any theme; never on admin/auth layouts, XHR, JSON,
+redirects or the module's own screens; links only for a role allowed `Comingsoon_AdminController`.
 
 **Auto-activate** falls out of the install, not a bespoke hook: `comingsoon` is in
 `Tiger_Headless_Spec::DEFAULT_MODULES`, so every fresh install (shared-host via TigerServer `installApp`,

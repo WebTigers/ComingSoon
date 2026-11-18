@@ -18,7 +18,7 @@ $bg  = $this->csBg;   // ['url','kind','mime'] or null
      data-cs-active="<?= $this->csActive ? '1' : '0' ?>"
      data-preview-base="/comingsoon/admin/preview">
 
-    <!-- On/off ("Go live") — a distinct, explicit action, separate from Save. -->
+    <!-- On/off — a distinct, explicit action, separate from Save. Turning it OFF asks first (TIGER-537). -->
     <div class="card mb-4">
         <div class="card-body d-flex flex-wrap align-items-center gap-3">
             <span class="d-inline-flex align-items-center">
@@ -114,5 +114,20 @@ $bg  = $this->csBg;   // ['url','kind','mime'] or null
     </div>
 </div>
 
+<?php
+// Strings the on/off toggle swaps in client-side (the layout prints the carrier; the JS reads Tiger.t).
+$this->i18n([
+    'cs_status_on'      => 'comingsoon.status.on',
+    'cs_status_on_note' => 'comingsoon.status.on.note',
+    'cs_status_off'     => 'comingsoon.status.off',
+    'cs_status_off_note'=> 'comingsoon.status.off.note',
+    'cs_confirm_title'  => 'comingsoon.confirm.title',
+    'cs_confirm_body'   => 'comingsoon.confirm.body',
+    'cs_confirm_ok'     => 'comingsoon.confirm.ok',
+    'cs_confirm_cancel' => 'comingsoon.confirm.cancel',
+    'cs_saved_on'       => 'comingsoon.saved.on',
+    'cs_saved_off'      => 'comingsoon.saved.off',
+]);
+?>
 <?php $this->pageScript('/_theme/js/tiger.media-picker.js'); ?>
 <?php $this->pageScript('/_modules/comingsoon/js/comingsoon.admin.js'); ?>
