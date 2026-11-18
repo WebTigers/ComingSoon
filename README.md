@@ -15,7 +15,7 @@ built to turn itself off the instant a real site goes live.
   aesthetic (background, palette, typography, layout). Adding a skin is adding two files; no template change.
 - **Fast and self-contained** — one request, inlined CSS, system fonts, **no external CDN**, built to
   clear Lighthouse 95+.
-- **Turns off cleanly** — an owner "Go live" toggle (or deactivating the module) hands the site straight
+- **Turns off cleanly** — an owner "Turn off Coming Soon" toggle (or deactivating the module) hands the site straight
   back to its real theme. No migration, no residue.
 
 ## Skins
@@ -36,8 +36,10 @@ in the picker. Skins are independent of the site's real theme; this is a holding
 ## Admin
 
 The owner picks a skin from their control panel (**Coming Soon** in the admin sidebar): preview cards, a
-live preview of their own site name and tagline in each skin, the on/off status, and a manual **Go live**
-override that shows the real site immediately even if it isn't finished.
+live preview of their own site name and tagline in each skin, the on/off status, and a manual **Turn off
+Coming Soon** (confirmed first) that shows the real site immediately even if it isn't finished. Signed-in
+users bypass the page, so while it's up every public page they view carries a slim bar saying visitors
+see the Coming Soon page, with a link to preview it.
 
 ## Install
 

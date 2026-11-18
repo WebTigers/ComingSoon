@@ -8,8 +8,21 @@ return [
     'comingsoon.status.on.note' => 'Visitors to your site see this page. It is replaced automatically when you publish your site.',
     'comingsoon.status.off'     => 'Your real site is showing',
     'comingsoon.status.off.note' => 'The Coming Soon page is turned off — visitors see your site as it is now.',
-    'comingsoon.golive'         => 'Show my site now',
-    'comingsoon.showcs'         => 'Show the Coming Soon page',
+    // The on/off button names what it does to VISITORS. "Show my site now" read like "show me my site"
+    // and switched the page off for everyone (TIGER-537).
+    'comingsoon.golive'         => 'Turn off Coming Soon',
+    'comingsoon.showcs'         => 'Turn on Coming Soon',
+    'comingsoon.confirm.title'  => 'Turn off the Coming Soon page?',
+    'comingsoon.confirm.body'   => 'Visitors will see your site as it is right now instead of the Coming Soon page. You can turn it back on at any time.',
+    'comingsoon.confirm.ok'     => 'Turn off',
+    'comingsoon.confirm.cancel' => 'Cancel',
+    'comingsoon.saved.on'       => 'The Coming Soon page is on. Visitors see it now.',
+    'comingsoon.saved.off'      => 'The Coming Soon page is off. Visitors see your site.',
+    // The signed-in notice bar on public pages (Comingsoon_Plugin_Notice).
+    'comingsoon.notice.title'    => 'Visitors see your Coming Soon page.',
+    'comingsoon.notice.body'     => 'You’re seeing the real site because you’re signed in.',
+    'comingsoon.notice.preview'  => 'Preview what visitors see',
+    'comingsoon.notice.settings' => 'Coming Soon settings',
     'comingsoon.skins'          => 'Choose a look',
     'comingsoon.preview'        => 'Preview',
     'comingsoon.current'        => 'Current',

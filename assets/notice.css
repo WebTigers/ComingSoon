@@ -1,0 +1,42 @@
+/* SPDX-License-Identifier: BSD-3-Clause
+ * ComingSoon — the signed-in notice bar (Comingsoon_Plugin_Notice). Injected into any public theme, so it
+ * reads the Bootstrap tokens when the theme has them and falls back to plain values when it doesn't.
+ * Static (not sticky) on purpose: it pushes the page down instead of covering a theme's sticky navbar. */
+.cs-notice {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .25rem 1.25rem;
+    margin: 0;
+    padding: .5rem 1rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: .875rem;
+    line-height: 1.4;
+    color: var(--bs-warning-text-emphasis, #664d03);
+    background: var(--bs-warning-bg-subtle, #fff3cd);
+    border-bottom: 1px solid var(--bs-warning-border-subtle, #ffe69c);
+}
+.cs-notice p { margin: 0; }
+.cs-notice__text { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .4rem; }
+.cs-notice__icon { flex: none; }
+.cs-notice__links { display: flex; flex-wrap: wrap; gap: .25rem 1rem; }
+.cs-notice a {
+    display: inline-block;
+    min-height: 1.5rem;
+    color: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: .15em;
+}
+.cs-notice a:hover { text-decoration-thickness: 2px; }
+.cs-notice a:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; border-radius: 2px; }
+/* Only the FALLBACKS change in dark mode: a Bootstrap theme's own tokens still win (they already follow
+ * its data-bs-theme), so this only darkens the bar on a theme that has no tokens at all. */
+@media (prefers-color-scheme: dark) {
+    .cs-notice {
+        color: var(--bs-warning-text-emphasis, #ffda6a);
+        background: var(--bs-warning-bg-subtle, #332701);
+        border-bottom-color: var(--bs-warning-border-subtle, #997404);
+    }
+}

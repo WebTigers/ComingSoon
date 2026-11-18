@@ -9,4 +9,5 @@ fresh-install landing.
 
 - Owns the public home (`/`) while active; every other route untouched.
 - Reads its content (name, tagline, contact, social) from Site Identity — nothing to fill in.
-- Owner picks a skin in the panel, with a live preview and a one-click "Go live".
+- Owner picks a skin in the panel, with a live preview and a confirmed "Turn off Coming Soon".
+- While it's up, signed-in users get a slim bar on public pages saying visitors see the holding page.

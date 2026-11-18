@@ -112,24 +112,39 @@
         Promise.resolve(run).then(function (r) { if (bad(r)) { return; } note('Saved.', 'success'); }).catch(function () { note('Network error — please try again.', 'error'); });
     });
 
-    /* ---- On/off ("Go live") — the one explicit immediate action ------------------------------- */
+    /* ---- On/off — the one explicit immediate action ------------------------------------------ */
+    // Turning the page OFF takes it down for every visitor, so it asks first (TIGER-537: the old
+    // "Show my site now" label read like "show ME my site" and switched it off without a word).
+    // Turning it back ON needs no confirm. Strings come from the page's i18n carrier.
+    function tr(alias) { return (window.Tiger && Tiger.t) ? Tiger.t(alias) : alias; }
+    function confirmOff() {
+        if (!(window.TigerModal && TigerModal.confirm)) { return Promise.resolve(true); }
+        return TigerModal.confirm({
+            title: tr('cs_confirm_title'), body: tr('cs_confirm_body'),
+            confirmLabel: tr('cs_confirm_ok'), cancelLabel: tr('cs_confirm_cancel'), variant: 'warning'
+        });
+    }
     var toggle = document.getElementById('cs-toggle');
     toggle.addEventListener('click', function () {
+        var btn = this;
         var makeActive = root.getAttribute('data-cs-active') !== '1';
-        api('set_active', { on: makeActive ? '1' : '0' }).then(function (r) {
-            if (bad(r)) { return; }
-            root.setAttribute('data-cs-active', makeActive ? '1' : '0');
-            var badge = document.getElementById('cs-status-badge');
-            var icon = badge.querySelector('i');
-            badge.classList.toggle('text-bg-success', makeActive);
-            badge.classList.toggle('text-bg-secondary', !makeActive);
-            if (icon) { icon.className = 'fa-solid ' + (makeActive ? 'fa-circle-check' : 'fa-circle') + ' me-1'; }
-            document.getElementById('cs-status-label').textContent = makeActive ? 'Your Coming Soon page is live' : 'Your real site is showing';
-            document.getElementById('cs-status-note').textContent = makeActive
-                ? 'Visitors to your site see this page. It is replaced automatically when you publish your site.'
-                : 'The Coming Soon page is turned off — visitors see your site as it is now.';
-            toggle.textContent = makeActive ? toggle.getAttribute('data-off-label') : toggle.getAttribute('data-on-label');
-            note('Saved.', 'success');
-        });
+        (makeActive ? Promise.resolve(true) : confirmOff()).then(function (ok) {
+            if (!ok) { return; }
+            var task = function () { return api('set_active', { on: makeActive ? '1' : '0' }); };
+            var run = (window.TigerButton && TigerButton.run) ? TigerButton.run(btn, task) : task();
+            return Promise.resolve(run).then(function (r) {
+                if (bad(r)) { return; }
+                root.setAttribute('data-cs-active', makeActive ? '1' : '0');
+                var badge = document.getElementById('cs-status-badge');
+                var icon = badge.querySelector('i');
+                badge.classList.toggle('text-bg-success', makeActive);
+                badge.classList.toggle('text-bg-secondary', !makeActive);
+                if (icon) { icon.className = 'fa-solid ' + (makeActive ? 'fa-circle-check' : 'fa-circle') + ' me-1'; }
+                document.getElementById('cs-status-label').textContent = tr(makeActive ? 'cs_status_on' : 'cs_status_off');
+                document.getElementById('cs-status-note').textContent = tr(makeActive ? 'cs_status_on_note' : 'cs_status_off_note');
+                toggle.textContent = makeActive ? toggle.getAttribute('data-off-label') : toggle.getAttribute('data-on-label');
+                note(tr(makeActive ? 'cs_saved_on' : 'cs_saved_off'), 'success');
+            });
+        }).catch(function () { note('Network error — please try again.', 'error'); });
     });
 })();
